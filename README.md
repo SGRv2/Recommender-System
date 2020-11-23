@@ -43,7 +43,7 @@ dushyant@ubuntu:~$ cd Recommender-System
 
 2. Run `RS_main.py` using `ratings.csv` as the user-ratings dataset and storing the output in `eval.csv`.
 ```console
-dushyant@ubuntu:~/Recommender-System$ python3 RS_main.py --input ratings.csv --output eval.csv --content-boost
+dushyant@ubuntu:~/Recommender-System$ python3 RS_main.py --input ratings.csv --output eval.csv --content_boost
 ```
 
 3. Run `test.py` with the file `test_users.txt` as input, storing the output in the file `output.csv`.
