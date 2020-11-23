@@ -10,8 +10,8 @@ def main():
   
   # parse args for the file names
   parser = argparse.ArgumentParser()
-  parser.add_argument('--input', action='store', dest='input_file', help='Input file')
-  parser.add_argument('--output', action='store', dest='eval_file', help='Output file')
+  parser.add_argument('--input', action='store', dest='input_file', default='ratings.csv', help='Input file')
+  parser.add_argument('--output', action='store', dest='eval_file', default='eval.csv', help='Output file')
   parser.add_argument('--content_boost', action='store_true', dest='content_boosted', help='Boolean for running content boost')
   parser.set_defaults(content_boosted=False)
   results = parser.parse_args()
