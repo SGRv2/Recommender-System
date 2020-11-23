@@ -30,7 +30,8 @@ class preprocess_UB_CF():
     # calculate similarity matrix only for train users
     self.similarity_matrix = self.get_similarity_matrix(self.utility_matrix_train)
     self.average_ratings = self.get_average_ratings() 
-    
+
+  # converts movieId from original dataset to a 0 indexed (contigous) id
   def calc_movieId_map(self):
     index = 0
     movieId_map = {}
@@ -86,8 +87,8 @@ class preprocess_content_boosted(preprocess_UB_CF):
 
     # calculate harmonic means based on number of movies rated
     self.harmonic_means = self.get_harmonic_means()
-    self.f1 = lambda x: self.func1(x)
-    self.f2 = lambda x: self.func2(x)
+    self.f1 = lambda x: self.func1(x) # uses helper function 1 for generating significance weights
+    self.f2 = lambda x: self.func2(x) # uses helper function 2 for generating significance weights
     
     # calculate co-rating weights
     self.sig_wt = self.get_sig_wt(self.utility_matrix)
@@ -98,9 +99,19 @@ class preprocess_content_boosted(preprocess_UB_CF):
     if (self.genre_boost): self.hybrid_corr_wt += self.user_genre_cosine_similarities 
 
     # content boosted similarity matrix
-    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) / 3 
+    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) / 1.5
 
+  def func1(self, val): # helper function to change utility matrix to binary matrix
+    if val>0:
+      return 1
+    else:
+      return 0
 
+  def func2(self, val): # function to co occurence matrix to significance weighting matrix  
+    if val > 50:
+      return 1.0
+    else:
+      return float(val/50)
 
   """
   Input : Utility Matrix, Vector of size num_genres containing counts of movies rated by user per genre
@@ -182,29 +193,21 @@ class preprocess_content_boosted(preprocess_UB_CF):
     mu['m'] = [1 if mu['num_movies'][i] >= 50 else mu['num_movies'][i] / 50 for i in range(mu.shape[0])] 
     return mu
 
-  def func1(self, val):
-    if val>0:
-      return 1
-    else:
-      return 0
 
-  def func2(self, val):
-    if val > 50:
-      return 1.0
-    else:
-      return float(val/50)
-
+  # generates similarity matrix that decreases weight if number of co rated movies are less than 50 
   def get_sig_wt(self, utility_mat): # find the co-rated items
-    x = np.nan_to_num(utility_mat)
+    x = np.nan_to_num(utility_mat)  # change nan values in utility matrix to 0
     vfunc1 = np.vectorize(self.f1)
     x = vfunc1(x)  # convert utility mat to binary matrix 
-    cooccurrence_matrix = np.dot(x, x.transpose())
+    cooccurrence_matrix = np.dot(x, x.transpose())  
     vfunc2 = np.vectorize(self.f2)
-    sig_wt = vfunc2(cooccurrence_matrix) 
+    sig_wt = vfunc2(cooccurrence_matrix) # calculate significance weighting matrix from coocurence matrix
     return sig_wt
 
+  # hybrid correlated weights to take harmonic means and similarity weighing into account 
   def get_hybrid_corr_wts(self, harmonic_means, sig_wt):
     return harmonic_means + sig_wt
 
+  # generates final content boosted similarity matrix 
   def get_weighted_similarity_matrix(self, hybrid_corr_wt):
     return (self.similarity_matrix*hybrid_corr_wt)

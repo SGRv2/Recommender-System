@@ -21,8 +21,8 @@ Outputs : list() Mean Average Error for the 5 folds
 def KFold_evaluate(ratings, ratings_train, content_boosted, movies):
   MAE = [] # store mean absolute error for each run 
   if content_boosted: print ("Starting evaluation with content boosting")
-  topN = 10 if content_boosted else 10
-  kf = KFold(n_splits = 5, shuffle = True, random_state = 2)
+  topN = 75 if content_boosted else 75
+  kf = KFold(n_splits = 5, shuffle = True, random_state = 2)  # 5 fold 
   j = 0 # track split number
   for training, testing in kf.split(ratings_train):
     j += 1
@@ -37,7 +37,7 @@ def KFold_evaluate(ratings, ratings_train, content_boosted, movies):
                   cv_preprocess.average_ratings)
     model.generate_neighborhood(topN)
 
-
+    # get predictions
     predicted_ratings = np.zeros(test.rating.shape)
     count = 0
     for i,record in enumerate(test.itertuples()):

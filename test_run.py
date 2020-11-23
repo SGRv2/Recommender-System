@@ -83,4 +83,5 @@ class UB_CF_test():
     user_av = self.average_ratings[user]
     if (resnick == 0): return -1
     resnick += user_av
+    resnick = 5 if resnick > 5 else resnick
     return resnick
