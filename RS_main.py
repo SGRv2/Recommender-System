@@ -23,8 +23,7 @@ def main():
   ratings_train, ratings_test = split_ratings_data(ratings, test_users)
 
   # run kfold cross-validation
-  topN = 10
-  MAE = KFold_evaluate(ratings, ratings_train, topN, results.content_boosted)
+  MAE = KFold_evaluate(ratings, ratings_train, results.content_boosted)
 
   # output MAE to file
   print ("\nDone with Evaluation\nWriting to eval file\n")

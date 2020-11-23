@@ -55,10 +55,6 @@ class preprocess_UB_CF():
       average_ratings[user] = np.nanmean(util_matrix_user)
     return average_ratings
 
-  def get_ratings_train(self):  # ??? 
-    max_ind = (self.ratings.userId.values == self.train_users).argmax()
-    return ratings[:max_ind]
-
 
 """
 Inherits the preprocess class and adds content boosting 

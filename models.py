@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pylab as plt
 
 class UB_CF:
   def __init__(self, ratings_train, movieId_map, utility_matrix, similarity_matrix, average_ratings):
