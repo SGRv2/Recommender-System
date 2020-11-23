@@ -51,7 +51,7 @@ To run Part-A of the assignment (i.e. original, bare-bones recommendation system
 dushyant@ubuntu:~/Recommender-System$ python3 RS_main.py --input ratings.csv --output eval.csv
 ```
 
-2. Run `test.py` with the file `test_users.txt` as input, storing the output in the file `output.csv`.
+2. Run `test.py` with the file `test_user.txt` as input, storing the output in the file `output.csv`.
 ```console
 dushyant@ubuntu:~/Recommender-System$ python3 test.py --input test_user.txt --output output.csv
 ```
