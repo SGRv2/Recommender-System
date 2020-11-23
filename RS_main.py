@@ -15,7 +15,8 @@ def main():
   parser.add_argument('--content_boost', action='store_true', dest='content_boosted', help='Boolean for running content boost')
   parser.set_defaults(content_boosted=False)
   results = parser.parse_args()
-  ratings, movies = read_data(results.input_file, "movies.csv")
+  results.input_file = './data/' + results.input_file
+  ratings, movies = read_data(results.input_file, "./data/movies.csv")
 
   # read test users
   test_users = read_test_users("test_user.txt")

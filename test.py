@@ -24,8 +24,9 @@ def main():
   parser.set_defaults(content_boosted=False)
   results = parser.parse_args()
 
+
   # read data an test users
-  ratings, movies = read_data("ratings.csv", "movies.csv")
+  ratings, movies = read_data("./data/ratings.csv", "./data/movies.csv")
   test_users = read_test_users(results.input_file)
 
   # split data according to test users
