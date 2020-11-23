@@ -11,6 +11,8 @@ class preprocess_UB_CF():
   def __init__(self, ratings, ratings_train):
     self.ratings = ratings
     self.ratings_train = ratings_train
+    
+    # generate mapping between dataset's ids to a 0 indexed movieId 
     self.movieId_map = self.calc_movieId_map()
     self.inv_movieId_map = {v: k for k, v in self.movieId_map.items()}
     
@@ -20,9 +22,12 @@ class preprocess_UB_CF():
     self.test_size = 10 # hard coded for now
     self.train_size = self.num_users - self.test_size 
 
+    # calculate utility_matix 
     self.utility_matrix = self.get_utility_matrix(self.ratings)
+    # calulate only for train users for getting similarity matrix matrix 
     self.utility_matrix_train = self.get_utility_matrix(self.ratings_train)
 
+    # calculate similarity matrix only for train users
     self.similarity_matrix = self.get_similarity_matrix(self.utility_matrix_train)
     self.average_ratings = self.get_average_ratings(self.utility_matrix_train) 
     
@@ -43,10 +48,12 @@ class preprocess_UB_CF():
       utility_matrix[(user - 1), self.movieId_map[movie]] = rating
     return utility_matrix
 
+  # df.corr() calculates the pearson similarities
   def get_similarity_matrix(self, utility_matrix):
     utility_df = pd.DataFrame(data=self.utility_matrix.transpose())
     return utility_df.corr()
   
+  # returns average ratings on all rated movies of users
   def get_average_ratings(self, utility_matrix):
     average_ratings = {}
     for user in range(self.utility_matrix.shape[0]):

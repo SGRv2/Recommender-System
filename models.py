@@ -2,6 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pylab as plt
 
+"""
+Model to generate neighborhood and then calculate predicted ratings using the resnick prediction formula
+Called for each fold of the k folds
+Initialised by : ratings train dataframe, movieId map, utility_matrix and average ratings.
+"""
 class UB_CF:
   def __init__(self, ratings_train, movieId_map, utility_matrix, similarity_matrix, average_ratings):
     self.ratings_train = ratings_train
