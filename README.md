@@ -35,7 +35,7 @@ dushyant@ubuntu:~/Recommender-System$ python3 RS_main.py --input ratings.csv --o
 dushyant@ubuntu:~/Recommender-System$ python3 test.py --input test_users.txt --output output.csv
 ```
 
-### Running Content Boosted Version
+### Running content boosted version
 1. Navigate to the project directory
 ```console
 dushyant@ubuntu:~$ cd Recommender-System
