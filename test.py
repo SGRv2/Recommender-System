@@ -33,7 +33,7 @@ def main():
   ratings_train, ratings_test = split_ratings_data(ratings, test_users)
 
   print("Running preprocessing")
-  preprocess = preprocess_content_boosted(ratings, ratings_train) if results.content_boosted else preprocess_UB_CF(ratings, ratings_train)
+  preprocess = preprocess_content_boosted(ratings, ratings_train, movies) if results.content_boosted else preprocess_UB_CF(ratings, ratings_train)
   
   topN = 50 if results.content_boosted else 75
   

@@ -1,7 +1,7 @@
 
 import pandas as pd
 import numpy as np
-
+from sklearn.metrics.pairwise import cosine_similarity
 
 """
 Intialised by : ratings, ratings_train dataframes
@@ -29,7 +29,7 @@ class preprocess_UB_CF():
 
     # calculate similarity matrix only for train users
     self.similarity_matrix = self.get_similarity_matrix(self.utility_matrix_train)
-    self.average_ratings = self.get_average_ratings(self.utility_matrix_train) 
+    self.average_ratings = self.get_average_ratings() 
     
   def calc_movieId_map(self):
     index = 0
@@ -54,7 +54,7 @@ class preprocess_UB_CF():
     return utility_df.corr()
   
   # returns average ratings on all rated movies of users
-  def get_average_ratings(self, utility_matrix):
+  def get_average_ratings(self):
     average_ratings = {}
     for user in range(self.utility_matrix.shape[0]):
       util_matrix_user = self.utility_matrix[user]
@@ -70,16 +70,76 @@ Intialised by : ratings, ratings_train dataframes
 Precomputes : utility matrix, weighted similarity matrix, average ratings per user  
 """
 class preprocess_content_boosted(preprocess_UB_CF):
-  def __init__(self, ratings, ratings_train):
+  def __init__(self, ratings, ratings_train, movies):
     super().__init__(ratings, ratings_train)
+    self.movies = movies
     self.movies_rated_per_user = self.get_movies_rated_per_user() 
+    self.movie_genre, self.genre_map = self.get_movie_genres(self.movies)
+
+    self.user_genre_counts, self.user_genre_vector = self.get_user_genres(self.movie_genre, self.genre_map, 
+                                                                          self.utility_matrix, self.inv_movieId_map)
+
+    
+    self.user_genre_cosine_similarities = self.get_user_genre_cosine_similarities(self.utility_matrix, self.user_genre_vector)
+
     self.harmonic_means = self.get_harmonic_means()
     self.f1 = lambda x: self.func1(x)
     self.f2 = lambda x: self.func2(x)
     self.sig_wt = self.get_sig_wt(self.utility_matrix)
+    
     self.hybrid_corr_wt = self.get_hybrid_corr_wts(self.harmonic_means, self.sig_wt)
-    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt)
+    self.genre_boost = True
+    if (self.genre_boost): self.hybrid_corr_wt += self.user_genre_cosine_similarities
 
+    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) 
+
+
+  def get_user_genre_cosine_similarities(self, utm, user_genre_vector):
+    user_genre_cs = np.zeros((utm.shape[0], utm.shape[0]))
+    for u1 in range(utm.shape[0]):
+      for u2 in range(utm.shape[0]):
+        if (u1 == u2): user_genre_cs[u1][u2] = 1
+        elif (u1 > u2): user_genre_cs[u1][u2] = user_genre_cs[u2][u1]
+        else:
+          user_genre_cs[u1][u2] = cosine_similarity(user_genre_vector[u1], user_genre_vector[u2])
+    return user_genre_cs
+
+  def get_movie_genres(self, movies):
+    movie_genre = {}
+    genres = {}
+    j = 0
+    for i in range(len(movies)):
+      movie_genre[movies.iloc[i].movieId] = movies.iloc[i].genres.split('|')
+      for g in movie_genre[movies.iloc[i].movieId]:
+        if g not in genres:
+          genres[g] = j
+          j+=1
+    return movie_genre, genres
+  
+  def get_user_genres(self, movie_genre, genre_map, utm, inv_movieId_map):
+    user_genre_counts = {}
+    num_genres = len(genre_map)
+
+    for user in range(utm.shape[0]):
+      user_genre_counts[user] = {}
+      for movie in range(utm.shape[1]):
+        if np.isnan(utm[user][movie]): continue
+        movieId = inv_movieId_map[movie]
+        for genre in movie_genre[movieId]:
+          if genre not in user_genre_counts[user]:
+            user_genre_counts[user][genre] = 0
+          user_genre_counts[user][genre] += 1 
+
+    user_genre_vector = {}
+    for user in user_genre_counts.keys():
+      user_genre_vector[user] = np.zeros((1,num_genres))
+      for genre, count in user_genre_counts[user].items():
+        a = 1
+        user_genre_vector[user][0][genre_map[genre]] = count
+
+    return user_genre_counts, user_genre_vector
+  
+  
   """
   calculate harmonic mean matrix of m values for each pair of users
   """

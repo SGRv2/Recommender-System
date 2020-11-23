@@ -18,10 +18,10 @@ Inputs : ratings dataframe,
 
 Outputs : list() Mean Average Error for the 5 folds   
 """
-def KFold_evaluate(ratings, ratings_train, content_boosted):
+def KFold_evaluate(ratings, ratings_train, content_boosted, movies):
   MAE = [] # store mean absolute error for each run 
   if content_boosted: print ("Starting evaluation with content boosting")
-  topN = 50 if content_boosted else 75
+  topN = 10 if content_boosted else 75
   kf = KFold(n_splits = 5, shuffle = True, random_state = 2)
   j = 0 # track split number
   for training, testing in kf.split(ratings_train):
@@ -30,7 +30,7 @@ def KFold_evaluate(ratings, ratings_train, content_boosted):
     train = ratings_train.iloc[training]
     test = ratings_train.iloc[testing]
     # initialise preprocess class
-    cv_preprocess = preprocess_content_boosted(ratings, train) if content_boosted else preprocess_UB_CF(ratings, train) 
+    cv_preprocess = preprocess_content_boosted(ratings, train, movies) if content_boosted else preprocess_UB_CF(ratings, train) 
     # initialise model and generate neighborhood
     model = UB_CF(train, cv_preprocess.movieId_map, cv_preprocess.utility_matrix, 
                   cv_preprocess.weighted_similarity_matrix if content_boosted else cv_preprocess.similarity_matrix, 
