@@ -73,6 +73,8 @@ class preprocess_content_boosted(preprocess_UB_CF):
   def __init__(self, ratings, ratings_train, movies):
     super().__init__(ratings, ratings_train)
     self.movies = movies
+    
+    # calculate genre based cosine similarities
     self.movies_rated_per_user = self.get_movies_rated_per_user() 
     self.movie_genre, self.genre_map = self.get_movie_genres(self.movies)
 
@@ -82,18 +84,28 @@ class preprocess_content_boosted(preprocess_UB_CF):
     
     self.user_genre_cosine_similarities = self.get_user_genre_cosine_similarities(self.utility_matrix, self.user_genre_vector)
 
+    # calculate harmonic means based on number of movies rated
     self.harmonic_means = self.get_harmonic_means()
     self.f1 = lambda x: self.func1(x)
     self.f2 = lambda x: self.func2(x)
+    
+    # calculate co-rating weights
     self.sig_wt = self.get_sig_wt(self.utility_matrix)
     
-    self.hybrid_corr_wt = self.get_hybrid_corr_wts(self.harmonic_means, self.sig_wt)
+    # calculate hybrid weights for content boosting
+    self.hybrid_corr_wt = self.get_hybrid_corr_wts(self.harmonic_means, self.sig_wt) 
     self.genre_boost = True
-    if (self.genre_boost): self.hybrid_corr_wt += self.user_genre_cosine_similarities
+    if (self.genre_boost): self.hybrid_corr_wt += self.user_genre_cosine_similarities 
 
-    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) 
+    # content boosted similarity matrix
+    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) / 3 
 
 
+
+  """
+  Input : Utility Matrix, Vector of size num_genres containing counts of movies rated by user per genre
+  Output : Cosine-Similarity matrix based on genre counts of user 
+  """
   def get_user_genre_cosine_similarities(self, utm, user_genre_vector):
     user_genre_cs = np.zeros((utm.shape[0], utm.shape[0]))
     for u1 in range(utm.shape[0]):
@@ -104,6 +116,7 @@ class preprocess_content_boosted(preprocess_UB_CF):
           user_genre_cs[u1][u2] = cosine_similarity(user_genre_vector[u1], user_genre_vector[u2])
     return user_genre_cs
 
+  # returns a dict {movie : list of genres} and a map dict {genre : genreId}
   def get_movie_genres(self, movies):
     movie_genre = {}
     genres = {}
@@ -115,7 +128,10 @@ class preprocess_content_boosted(preprocess_UB_CF):
           genres[g] = j
           j+=1
     return movie_genre, genres
-  
+  """
+  returns a dict {user : genre : genre count} and
+  vector of size num_genres containing counts of movies rated by user per genre
+  """
   def get_user_genres(self, movie_genre, genre_map, utm, inv_movieId_map):
     user_genre_counts = {}
     num_genres = len(genre_map)

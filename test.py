@@ -35,7 +35,7 @@ def main():
   print("Running preprocessing")
   preprocess = preprocess_content_boosted(ratings, ratings_train, movies) if results.content_boosted else preprocess_UB_CF(ratings, ratings_train)
   
-  topN = 50 if results.content_boosted else 75
+  topN = 10 if results.content_boosted else 10
   
   print("Running predictions on all unseen movies")
   test_run = UB_CF_test(ratings_test, preprocess.utility_matrix, 
