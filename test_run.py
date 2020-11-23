@@ -69,7 +69,7 @@ class UB_CF_test():
   Resnick prediction function
   divide_by_two : optional boolean to control for overflowing ratings above 5
   """
-  def get_resnick(self, user, movie, divide_by_two = True):
+  def get_resnick(self, user, movie, divide_by_two = False):
     resnick = 0
     sum_sim = 0 
     for nbr in self.neighbors[user]:

@@ -99,7 +99,7 @@ class preprocess_content_boosted(preprocess_UB_CF):
     if (self.genre_boost): self.hybrid_corr_wt += self.user_genre_cosine_similarities 
 
     # content boosted similarity matrix
-    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) / 1.5
+    self.weighted_similarity_matrix = self.get_weighted_similarity_matrix(self.hybrid_corr_wt) / 3
 
   def func1(self, val): # helper function to change utility matrix to binary matrix
     if val>0:
